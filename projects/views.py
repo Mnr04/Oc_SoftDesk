@@ -3,12 +3,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import Project
-from .serializers import ProjectSerializer
+from .models import Project, Contributor
+from .serializers import ProjectSerializer, ContributorSerializer
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def project_manager_view(request, pk=None):
+
     if pk is None:
 
         if request.method == 'GET':
@@ -32,7 +33,7 @@ def project_manager_view(request, pk=None):
 
         elif request.method == 'PUT':
             if project.author != request.user:
-                return Response({"Vous n'êtes pas l'auteur"}, status=status.HTTP_403_FORBIDDEN)
+                return Response({"error": "Vous n'êtes pas l'auteur"}, status=status.HTTP_403_FORBIDDEN)
 
             serializer = ProjectSerializer(project, data=request.data, partial=True)
             if serializer.is_valid():
@@ -42,7 +43,35 @@ def project_manager_view(request, pk=None):
 
         elif request.method == 'DELETE':
             if project.author != request.user:
-                return Response({"Vous n'êtes pas l'auteur"}, status=status.HTTP_403_FORBIDDEN)
+                return Response({{"error": "Vous n'êtes pas l'auteur"}}, status=status.HTTP_403_FORBIDDEN)
 
             project.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET', 'POST', 'DELETE'])
+def contributor_manager_view(request, pk=None):
+
+    if pk is None:
+
+        if request.method == 'GET':
+            contributors = Contributor.objects.all()
+            serializer = ContributorSerializer(contributors, many=True)
+            return Response(serializer.data)
+
+        elif request.method == 'POST':
+            serializer = ContributorSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    else:
+        contributor = get_object_or_404(Contributor, pk=pk)
+
+        if request.method == 'GET':
+            serializer = ContributorSerializer(contributor)
+            return Response(serializer.data)
+
+        elif request.method == 'DELETE':
+            contributor.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
