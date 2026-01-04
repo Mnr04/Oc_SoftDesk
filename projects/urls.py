@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import project_view, contributor_view, issue_view
+from .views import project_view, contributor_view, issue_view, comment_view
 
 urlpatterns = [
     path('projects/', project_view, name='project-list'),
@@ -10,5 +10,8 @@ urlpatterns = [
 
     path('issues/', issue_view, name='issue-list'),
     path('issues/<int:pk>/', issue_view, name='issue-detail'),
+
+    path('comments/', comment_view, name='comment-list'),
+    path('comments/<int:pk>/', comment_view, name='comment-detail'),
 
 ]

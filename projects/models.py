@@ -43,3 +43,12 @@ class Issue(models.Model):
 
     def __str__(self):
         return self.title
+
+class Comment(models.Model):
+    description = models.TextField(max_length=2048)
+    created_time = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    issue = models.ForeignKey(to=Issue, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Commentaire de {self.author}"

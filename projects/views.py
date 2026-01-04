@@ -3,8 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import Project, Contributor, Issue
-from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer
+from .models import Project, Contributor, Issue, Comment
+from .serializers import ProjectSerializer, ContributorSerializer, IssueSerializer, CommentSerializer
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
@@ -114,4 +114,44 @@ def issue_view(request, pk=None):
                  return Response({"error": "Vous n'êtes pas l'auteur"}, status=status.HTTP_403_FORBIDDEN)
 
             issue.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+def comment_view(request, pk=None):
+
+    if pk is None:
+        if request.method == 'GET':
+            comment = Comment.objects.all()
+            serializer = CommentSerializer(comment, many=True)
+            return Response(serializer.data)
+
+        elif request.method == 'POST':
+            serializer = CommentSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(author=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    else:
+        comment = get_object_or_404(Comment, pk=pk)
+
+        if request.method == 'GET':
+            serializer = CommentSerializer(comment)
+            return Response(serializer.data)
+
+        elif request.method == 'PUT':
+            if comment.author != request.user:
+                 return Response({"error": "Vous n'êtes pas l'auteur"}, status=status.HTTP_403_FORBIDDEN)
+
+            serializer = CommentSerializer(comment, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.method == 'DELETE':
+            if comment.author != request.user:
+                 return Response({"error": "Vous n'êtes pas l'auteur"}, status=status.HTTP_403_FORBIDDEN)
+
+            comment.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
