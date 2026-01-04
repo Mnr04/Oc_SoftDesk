@@ -43,7 +43,7 @@ def project_view(request, pk=None):
 
         elif request.method == 'DELETE':
             if project.author != request.user:
-                return Response({{"error": "Vous n'êtes pas l'auteur"}}, status=status.HTTP_403_FORBIDDEN)
+                return Response({"error": "Vous n'êtes pas l'auteur"}, status=status.HTTP_403_FORBIDDEN)
 
             project.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -54,7 +54,12 @@ def contributor_view(request, pk=None):
     if pk is None:
 
         if request.method == 'GET':
-            contributors = Contributor.objects.all()
+            if 'project_id' in request.GET:
+                id_du_projet = request.GET['project_id']
+                contributors = Contributor.objects.filter(project=id_du_projet)
+            else:
+                contributors = Contributor.objects.all()
+
             serializer = ContributorSerializer(contributors, many=True)
             return Response(serializer.data)
 
@@ -81,7 +86,12 @@ def issue_view(request, pk=None):
 
     if pk is None:
         if request.method == 'GET':
-            issues = Issue.objects.all()
+            if 'project_id' in request.GET:
+                id_du_projet = request.GET['project_id']
+                issues = Issue.objects.filter(project=id_du_projet)
+            else:
+                issues = Issue.objects.all()
+
             serializer = IssueSerializer(issues, many=True)
             return Response(serializer.data)
 
@@ -121,8 +131,13 @@ def comment_view(request, pk=None):
 
     if pk is None:
         if request.method == 'GET':
-            comment = Comment.objects.all()
-            serializer = CommentSerializer(comment, many=True)
+            if 'issue_id' in request.GET:
+                id_du_ticket = request.GET['issue_id']
+                comments = Comment.objects.filter(issue=id_du_ticket)
+            else:
+                comments = Comment.objects.all()
+
+            serializer = CommentSerializer(comments, many=True)
             return Response(serializer.data)
 
         elif request.method == 'POST':
