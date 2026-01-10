@@ -14,3 +14,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+        
+        
+class ContributorViewSet(viewsets.ModelViewSet):
+    serializer_class = ContributorSerializer
+    permission_classes = [IsAuthenticated, IsProjectContributor, IsAuthorOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        projects = Project.objects.filter(author=user) | Project.objects.filter(contributor__user=user)
+        return Contributor.objects.filter(project__in=projects)
