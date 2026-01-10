@@ -5,7 +5,7 @@ from .views import ProjectViewSet
 router = DefaultRouter()
 
 router.register('projects', ProjectViewSet, basename='project')
-
+routee.register('contributors', ContributorViewSet, basename='contributor')
 
 urlpatterns = [
     path('', include(router.urls)),
