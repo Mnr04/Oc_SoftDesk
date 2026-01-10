@@ -7,3 +7,10 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = ['id', 'title', 'description', 'type', 'author', 'created_time']
+
+class contributorSerializer(serializers.Model.Serializer):
+    author = serializers.StingRelatedFields(read_only=True)
+    
+    class Meta:
+        model = contributor
+        fields = ['id','user','project']
